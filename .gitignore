@@ -24,3 +24,6 @@ test-results/
 .DS_Store
 # Private database backups / inspection artifacts
 .local/
+
+# Separate free public preview build
+dist-demo/

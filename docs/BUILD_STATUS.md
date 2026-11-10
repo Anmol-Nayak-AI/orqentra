@@ -1,5 +1,7 @@
 # Orqentra build status — 2026-11-10
 
+Public free preview: **https://orqentra-demo.onrender.com** ([scope and live verification](FREE_PREVIEW.md)). Separate static build, fictional data, scripted/local answers, no account or backend/provider connection. It does not replace or accept the full application. This increment passes 105 backend unit tests, 63 frontend tests and two browser checks against the live URL; existing database data/volumes are unchanged.
+
 Latest verified increment: [commercial billing lifecycle, hosted maintenance and tracing](COMMERCIAL_LIFECYCLE_2026_11_10.md). Revision **0011** is deployed locally: test checkout/reconciliation/cancellation/invoice UI and APIs, three new forced-RLS tables, a separate manual hosted-database job and opt-in payload-safe request tracing. **103 backend unit, 98 database, 61 frontend, 4 CSP and 7 anonymous browser checks passed** (expected live-model/configuration skips are documented). Health/readiness return 200; anonymous identity access returns 401; disabled billing callbacks return 503. All existing data is preserved. Commercial acceptance remains **PENDING**. The sections below retain earlier increment evidence; the linked report supersedes their billing/remote-job/request-tracing implementation gaps.
 
 The application now includes a working development AI onboarding workflow, beyond the identity/organization foundation. It is not approved for production release.

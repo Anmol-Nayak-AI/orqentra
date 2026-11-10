@@ -35,6 +35,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: make check-web
+      - name: Build isolated public preview
+        run: npm run build:demo --workspace @orqentra/web
   integration:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -51,6 +53,17 @@ jobs:
       - run: make install
       - run: make contracts-check
       - run: npm exec --workspace @orqentra/web -- playwright install --with-deps chromium
+      - name: Free preview browser regression
+        run: |
+          npm run build:demo --workspace @orqentra/web
+          python3 -m http.server 4174 --bind 127.0.0.1 --directory apps/web/dist-demo > /tmp/orqentra-preview.log 2>&1 &
+          preview_server_pid=$!
+          trap 'kill "$preview_server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:4174/ > /dev/null; then break; fi
+            sleep 1
+          done
+          E2E_BASE_URL=http://127.0.0.1:4174 E2E_DEMO_URL=http://127.0.0.1:4174 npm run test:e2e --workspace @orqentra/web -- free-preview.spec.ts
       - run: make e2e
       - run: make setup compose-check up
       - name: Disposable database integration suite
