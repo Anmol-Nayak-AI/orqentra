@@ -46,3 +46,7 @@ Post-rebuild browser smoke completed: **seven passed, one expected configuration
 ## Functional integration update — 2026-11-10
 
 The [functional release](FUNCTIONAL_RELEASE_2026_11_10.md) supersedes the earlier unexposed-adapter limitation: persisted independent code approvals, queue/start controls, worker dispatch, audit/reference recording and result states are implemented. Python analysis is a second grounded proposal workflow. The pending-write race was reproduced and corrected through migration 0010; prior migrations were preserved. Real E2B execution is still disabled and unverified, and production acceptance remains pending.
+
+## Provider preparation — 10 November 2026
+
+Sandbox admission now serializes on the tenant organization row and counts committed RUNNING attempts before claiming another queued job. `ORQENTRA_SANDBOX_MAX_CONCURRENT_PER_ORGANIZATION` defaults to one and accepts only 1–2. A controlled two-worker regression observed the second worker leave queued work untouched until the first attempt completed. This is per-tenant admission control, not an account-wide E2B spend limit. Existing 60-second remote lifetime, two-minute claim uncertainty interval, independent approval, quotas and disabled-by-default configuration remain in force. Real multi-organization/global-account concurrency and provider billing/cleanup acceptance require explicit authorization; see PROVIDER_ACCEPTANCE.md.
