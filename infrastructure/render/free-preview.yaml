@@ -1,0 +1,37 @@
+# Free static preview only. No API, database, worker, payment or sandbox resources.
+# No provider keys belong in this service. Autodeploys/previews remain off.
+services:
+  - type: web
+    name: orqentra-demo
+    runtime: static
+    branch: develop
+    autoDeployTrigger: "off"
+    buildCommand: npm ci && npm run build:demo --workspace @orqentra/web
+    staticPublishPath: apps/web/dist-demo
+    previews:
+      generation: "off"
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.2
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=()
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"

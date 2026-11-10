@@ -15,3 +15,5 @@
 
 # Private database backups are never build inputs.
 .local
+
+**/dist-demo
