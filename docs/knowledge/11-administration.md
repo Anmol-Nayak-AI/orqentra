@@ -1,0 +1,6 @@
+# Orqentra guide · Organization administration
+Organization Settings gives OWNER/ADMIN users an administration console. To rename an organization, enter Settings, change Organization name and select Save name. Existing URLs, slug, memberships and records are preserved. If another administrator changed it first, refresh before saving again; stale updates are rejected. Other roles see read-only organization information.
+
+Usage and resources shows current active members, workspaces, documents and indexed sources, teammate definitions and open human requests. Chat turns, task runs and recorded generation tokens cover a rolling 30-day period. Select Refresh for current figures. Recorded tokens are not an invoice or complete provider bill: embeddings, failed or uncertain calls and earlier attempts overwritten by later usage are excluded. Payment processing and subscription billing are not implemented in this build.
+
+To export audit history, open Settings and select Download audit JSON. Each file contains up to 500 organization events, identifiers and timestamps. If more rows exist, use Download next page. Start a new export restarts from the newest event. Protect downloaded files according to your organization's policies. Export access requires OWNER/ADMIN permission and remains scoped to the selected organization.

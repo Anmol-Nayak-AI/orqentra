@@ -1,0 +1,6 @@
+# Orqentra guide · Current limits and honest answers
+This guide describes Orqentra's development build as of 9 November 2026. It is not a production certification, pricing contract or availability promise. Checkpoint 2C remains pending for the genuine Clerk-invalidation interval; subsequent feature work was explicitly authorized without accepting that gate.
+
+The development chat accepts up to 20 turns per organization per UTC day, with one AI turn pending per conversation. Knowledge is text-only with 20 active documents per workspace and a 24,000-character document cap. New organizations require explicit worker allowlisting before background indexing or AI processing. Backend credentials stay in ignored environment files.
+
+There is no published pricing, billing integration, guaranteed support SLA, measured model-quality guarantee, PDF ingestion, arbitrary tool execution, outbound connector, multi-provider integration or enterprise production release approval in this build. When a question asks for an undocumented plan, account balance, live usage, someone's private data or a future release date, the assistant must say it lacks verified information and offer authorized human help. It must not make up capabilities, prices, people, policies or dates.

@@ -1,0 +1,88 @@
+name: Platform checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: '0.12.23'
+          enable-cache: true
+      - run: uv sync --locked --all-packages --all-groups
+      - run: make check-api
+      - name: Validate unapplied deployment manifests
+        run: uv run --locked --package orqentra-api python scripts/check_deployment_manifests.py
+      - name: Check portable web entrypoint
+        run: sh -n infrastructure/start-web.sh
+      - run: uv build --package orqentra-api
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: make check-web
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: '0.12.23'
+          enable-cache: true
+      - run: make install
+      - run: make contracts-check
+      - run: npm exec --workspace @orqentra/web -- playwright install --with-deps chromium
+      - run: make e2e
+      - run: make setup compose-check up
+      - name: Disposable database integration suite
+        run: make test-db
+      - name: Forward migration and runtime role
+        run: make migrate runtime-setup db-current migration-check
+      - name: Container liveness and PostgreSQL smoke
+        run: |
+          curl --fail --retry 5 --retry-delay 2 http://127.0.0.1:8080/api/v1/health
+          curl --fail http://127.0.0.1:8080/
+          docker compose --env-file .env -f infrastructure/compose.yaml exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -c "SELECT 1"'
+      - name: Browser smoke against built containers
+        run: E2E_BASE_URL=http://127.0.0.1:8080 make e2e
+      - name: Shut down local containers
+        if: always()
+        run: docker compose --env-file .env -f infrastructure/compose.yaml down
+  dependency-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: '0.12.23'
+      - run: npm ci
+      - name: Audit production JavaScript dependency graph
+        run: npm audit --omit=dev --audit-level=high
+      - name: Export locked runtime Python dependencies
+        run: uv export --locked --package orqentra-api --no-dev --no-hashes --no-emit-project --output-file runtime-requirements.txt
+      - name: Audit runtime Python dependencies
+        run: uvx --from pip-audit==2.10.1 pip-audit --no-deps --disable-pip -r runtime-requirements.txt

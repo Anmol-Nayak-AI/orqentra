@@ -1,0 +1,66 @@
+# TEMPLATE ONLY. Do not apply without explicit approval: applying creates paid resources.
+# Database/runtime role/CA and migration job are provisioned separately after approval.
+# No provider calls or deployment commands are run by repository CI.
+services:
+  - type: pserv
+    name: orqentra-staging-api
+    runtime: docker
+    region: singapore
+    plan: 0.5c-512mb
+    dockerContext: .
+    dockerfilePath: apps/api/Dockerfile
+    autoDeployTrigger: "off"
+    maxShutdownDelaySeconds: 60
+    envVars:
+      - fromGroup: orqentra-staging-runtime
+  - type: worker
+    name: orqentra-staging-worker
+    runtime: docker
+    region: singapore
+    plan: 0.5c-512mb
+    dockerContext: .
+    dockerfilePath: apps/api/Dockerfile
+    dockerCommand: python -m orqentra.execution.worker
+    autoDeployTrigger: "off"
+    maxShutdownDelaySeconds: 90
+    envVars:
+      - fromGroup: orqentra-staging-runtime
+      - key: ORQENTRA_WORKER_ORGANIZATIONS
+        sync: false
+  - type: web
+    name: orqentra-staging-web
+    runtime: docker
+    region: singapore
+    plan: 0.5c-512mb
+    dockerContext: .
+    dockerfilePath: apps/web/Dockerfile
+    autoDeployTrigger: "off"
+    healthCheckPath: /healthz
+    envVars:
+      - key: ORQENTRA_DEPLOYMENT_ENV
+        value: staging
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: ORQENTRA_API_UPSTREAM
+        fromService:
+          name: orqentra-staging-api
+          type: pserv
+          property: hostport
+
+envVarGroups:
+  - name: orqentra-staging-runtime
+    envVars:
+      - key: ORQENTRA_ENVIRONMENT
+        value: staging
+      - key: ORQENTRA_ALLOWED_HOSTS
+        sync: false
+      - key: ORQENTRA_DATABASE_URL
+        sync: false
+      - key: CLERK_ISSUER
+        sync: false
+      - key: CLERK_JWT_KEY
+        sync: false
+      - key: CLERK_ALLOWED_ORIGINS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

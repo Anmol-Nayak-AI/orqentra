@@ -1,0 +1,52 @@
+name: Reviewed hosted database maintenance
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [staging, production]
+        required: true
+      action:
+        type: choice
+        options: [check, upgrade]
+        default: check
+        required: true
+      backup_reference:
+        type: string
+        description: Provider backup reference required for upgrade; never credentials or a signed URL
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: database-maintenance-${{ inputs.environment }}
+  cancel-in-progress: false
+jobs:
+  database:
+    # Configure this GitHub Environment with required reviewers before supplying secrets.
+    environment: ${{ inputs.environment }}-database-maintenance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: '0.12.23'
+      - run: uv sync --locked --all-packages --all-groups
+      - name: Offline credential and target validation
+        env: &database_env
+          ORQENTRA_MIGRATION_DATABASE_URL: ${{ secrets.ORQENTRA_MIGRATION_DATABASE_URL }}
+          ORQENTRA_DATABASE_URL: ${{ secrets.ORQENTRA_DATABASE_URL }}
+          JOB_ENVIRONMENT: ${{ inputs.environment }}
+          JOB_ACTION: ${{ inputs.action }}
+          JOB_HOST: ${{ vars.DATABASE_HOST }}
+          JOB_DATABASE: ${{ vars.DATABASE_NAME }}
+          JOB_BACKUP: ${{ inputs.backup_reference }}
+        run: >-
+          uv run --locked --package orqentra-api python scripts/hosted_database.py validate
+          --environment "$JOB_ENVIRONMENT" --host "$JOB_HOST" --database "$JOB_DATABASE"
+      - name: Run explicitly requested maintenance
+        env: *database_env
+        run: >-
+          uv run --locked --package orqentra-api python scripts/hosted_database.py "$JOB_ACTION"
+          --environment "$JOB_ENVIRONMENT" --host "$JOB_HOST" --database "$JOB_DATABASE"
+          --backup-reference "$JOB_BACKUP"
