@@ -5,6 +5,10 @@ for (const width of [390, 1440]) {
     page,
   }, info) => {
     test.skip(!process.env.E2E_DEMO_URL, "Separate static preview deployment check only");
+    const unsupportedApi = await page.request.get(
+      new URL("/api/v1/me", process.env.E2E_DEMO_URL!).href,
+    );
+    expect(unsupportedApi.status()).toBe(404);
     const requests: string[] = [];
     const errors: string[] = [];
     page.on("request", (request) => requests.push(request.url()));

@@ -15,10 +15,7 @@ services:
         value: 22.22.2
       - key: SKIP_INSTALL_DEPS
         value: "true"
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    routes: []
     headers:
       - path: /*
         name: X-Content-Type-Options
