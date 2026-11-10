@@ -2,9 +2,13 @@
 
 **Your workforce, intelligently orchestrated.**
 
+**[Open the free interactive demo](https://orqentra-demo.onrender.com)** · [Explore guided chat](https://orqentra-demo.onrender.com/#chat)
+
+The public demo uses fictional browser-local data and scripted product answers. No login is required; it does not connect to the backend, live AI, payments or a sandbox. [Demo scope and verification](docs/FREE_PREVIEW.md).
+
 Orqentra is a multi-tenant AI workforce application built with React, FastAPI, PostgreSQL/pgvector and LangGraph. It combines source-grounded AI assistance, human support handoff, reviewed task artifacts and independently approved isolated code execution.
 
-**Status: active development, not production-accepted.** The application runs locally; Render templates are unapplied, billing supports test mode only, and E2B execution remains disabled until separately authorized. A configured key does not authorize provider resource usage.
+**Status: active development, not production-accepted.** The application runs locally; Full-stack Render templates are unapplied, billing supports test mode only, and E2B execution remains disabled until separately authorized. A configured key does not authorize provider resource usage.
 
 ## For reviewers and recruiters
 

@@ -1,5 +1,7 @@
 # Commercial release acceptance — 2026-11-10
 
+A free public interface preview is now live at [orqentra-demo.onrender.com](https://orqentra-demo.onrender.com). It uses fictional, browser-local data and scripted answers; [observed preview evidence](FREE_PREVIEW.md) does not close the full-stack deployment, authentication, model/provider or commercial release gates.
+
 Decision: **PENDING — not authorized for public deployment or customer payments.** Local implementation continues; account absence is not reported as a completed integration.
 
 | Gate | Current evidence | Remaining acceptance |
